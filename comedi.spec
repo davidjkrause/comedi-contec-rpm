@@ -1,6 +1,6 @@
 Name:           comedi
 Version:        0.7.76.1
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        Comedi kernel driver with Contec FiT driver addition
 
 License:        GPLv3
@@ -22,7 +22,7 @@ Requires(pre):  shadow-utils
 %global current_kernel $(rpm -q kernel-debug-devel | sed -r 's/kernel-debug-devel-(.*)/\\1/')+debug
 %endif
 
-%define _unpackaged_files_terminate_build 0
+# There are no debug files associated with a kernel module, so don't generate debuginfo package
 %global debug_package %{nil}
 
 
@@ -51,6 +51,10 @@ make
 %install
 rm -rf $RPM_BUILD_ROOT
 %make_install
+# Remove /lib/modules/... files created by depmod, they are not useful in
+# an RPM, and need to be re-created on the machine where the driver is
+# installed, which happens in the %post step
+rm $RPM_BUILD_ROOT/lib/modules/%{current_kernel}/modules.*
 
 
 # Post-install, run depmod so comedi and related drivers can be modprobe'd

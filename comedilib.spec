@@ -1,6 +1,6 @@
 Name:           comedilib
 Version:        0.11.0
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        Comedilib user spaces tools for comedi kernel driver
 
 License:        GPLv3
