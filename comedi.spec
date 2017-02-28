@@ -1,10 +1,14 @@
 Name:           comedi
 Version:        0.7.76.1
-Release:        6%{?dist}
-Summary:        Comedi kernel driver with Contec FiT driver addition
-
+Release:        7%{?dist}
+URL:            https://github.com/davidjkrause/comedi-contec-rpm
+Summary:        Data Acquisition device kernel driver with Contec FiT driver addition
 License:        GPLv3
-Source0:        comedi-0.7.76.1.tar.gz
+
+%global commit0 1881165dd06542c56f7ad6f72022293562df3337
+%global shortcommit0 %(c=%{commit0}; echo ${c:0:7})
+
+Source0:        https://github.com/Linux-Comedi/%{name}/archive/%{commit0}/%{name}-%{version}.tar.gz
 Patch0:         0001-Add-contec_fit-driver-to-comedi.patch
 
 BuildRequires:  kernel-devel autoconf automake gcc make module-init-tools
@@ -27,11 +31,11 @@ Requires(pre):  shadow-utils
 
 
 %description
-
+Package from comedi.org for kernel driver, with added driver for
+Contec FiT devices
 
 %prep
-%setup -q
-%patch0 -p1
+%autosetup -n %{name}-%{commit0} -p1
 
 
 # Add an iogroup
@@ -43,6 +47,7 @@ getent group iogroup >/dev/null || groupadd -r iogroup
 ./autogen.sh
 ./configure \
    --with-rpm-target=x86_64 \
+   --libdir=%{_usr}/%{_lib} \
    --with-linuxsrcdir=/usr/src/kernels/%{current_kernel} \
    --with-linuxdir=/usr/src/kernels/%{current_kernel}
 make
@@ -52,8 +57,8 @@ make
 rm -rf $RPM_BUILD_ROOT
 %make_install
 # Remove /lib/modules/... files created by depmod, they are not useful in
-# an RPM, and need to be re-created on the machine where the driver is
-# installed, which happens in the %post step
+# an RPM, and need to be re-created on the machine where the driver is 
+# installed, which happens in the post step
 rm $RPM_BUILD_ROOT/lib/modules/%{current_kernel}/modules.*
 
 
@@ -76,6 +81,10 @@ depmod -a
 /lib/modules/*/comedi/kcomedilib/kcomedilib.ko
 
 %changelog
+* Tue Feb 28 2017 David Krause <david.krause@gmail.com> - 0.7.76.1-7
+- Pull source from github
+- Cleanups for rpmlint
+
 * Fri Feb 10 2017 David Krause <david.krause@gmail.com> - 0.7.76.1-1
 - First comedi package with contec_fit
 
